@@ -1,0 +1,3 @@
+name: "mnist"
+num_labels: 10
+batch_size: ${training.batch_size}

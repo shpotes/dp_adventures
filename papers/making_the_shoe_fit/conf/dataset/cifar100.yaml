@@ -1,0 +1,3 @@
+name: "cifar100"
+num_labels: 100
+batch_size: ${training.batch_size}
