@@ -26,8 +26,8 @@ def create_train_state(model, tx, rng, input_shape=[28, 28, 1]):
         apply_fn=model.apply, params=params, tx=tx
     )
 
-@partial(jax.jit, static_argnums=0)
-def _train_step(model, state, batch):
+@partial(jax.jit, static_argnums=(0, 1))
+def train_step(dp, model, state, batch):
     # TODO: add DP support
 
     def loss_fn(params):
@@ -44,6 +44,6 @@ def _train_step(model, state, batch):
     return state, metrics
 
 @partial(jax.jit, static_argnums=0)
-def _test_step(model, params, batch):
+def test_step(model, params, batch):
     logits = model.apply({"params": params}, batch["image"])
     return compute_metrics(logits=logits, labels=batch["label"], split="test")
