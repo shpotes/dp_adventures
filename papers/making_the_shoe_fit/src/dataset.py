@@ -13,15 +13,16 @@ def _preprocess_image_dataset(
     
     return {"image": rescaled_image, "label": one_hot_label}
 
-def load_mnist(
+def load_dataset(
+    name: str,
+    num_labels: int, 
     batch_size: int,
     preprocess: bool = True,
     split: tfds.Split = tfds.Split.TRAIN,
     shuffle: bool = True,
     buffer_size: int = 10_000
 ) -> tf.data.Dataset:
-    
-    dataset = tfds.load("mnist", split=split)
+    dataset = tfds.load(name, split=split)
     if shuffle:
         dataset.shuffle(buffer_size)
     
@@ -30,11 +31,10 @@ def load_mnist(
     if preprocess:
         dataset = (
             dataset.map(
-                partial(_preprocess_image_dataset, num_labels=10),
+                partial(_preprocess_image_dataset, num_labels=num_labels),
                 num_parallel_calls=tf.data.AUTOTUNE,
             )
             .prefetch(tf.data.AUTOTUNE)
         )
     
     return dataset
-
