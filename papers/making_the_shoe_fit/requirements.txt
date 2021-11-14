@@ -4,3 +4,5 @@ optax
 tensorflow_datasets
 tensorflow
 wandb
+tqdm
+hydra-core
