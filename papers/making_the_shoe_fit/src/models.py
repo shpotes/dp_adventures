@@ -1,11 +1,12 @@
 from typing import Callable
 from flax import linen as nn
 
+
 class MnistCNN(nn.Module):
     """
     Model of Table 1. 
     """
-    k_filters: int = 31
+    k_filters: int = 32
     activation: Callable = nn.relu
     
     @nn.compact
