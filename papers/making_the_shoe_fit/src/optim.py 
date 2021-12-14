@@ -1,0 +1,39 @@
+from optax import (
+    chain, 
+    differentially_private_aggregate,
+    scale_by_adam,
+    scale_by_schedule,
+    scale,
+    Schedule
+)
+
+ScalarOrSchedule = Union[float, Schedule]
+
+def _scale_by_learning_rate(learning_rate: ScalarOrSchedule, flip_sign=True):
+  m = -1 if flip_sign else 1
+  if callable(learning_rate):
+    return scale_by_schedule(lambda count: m * learning_rate(count))
+  return scale(m * learning_rate)
+
+def dpadam(
+    learning_rate: ScalarOrSchedule,
+    l2_norm_clip: float,
+    noise_multiplier: float,
+    seed: int,
+    b1: float = 0.9,
+    b2: float = 0.999,
+    eps: float = 1e-8,
+    eps_root: float = 0.0,
+    mu_dtype: Optional[Any] = None,
+) -> base.GradientTransformation:
+    return chain(
+        differentially_private_aggregate(
+          l2_norm_clip=l2_norm_clip,
+          noise_multiplier=noise_multiplier,
+          seed=seed
+        ),
+        scale_by_adam(
+            b1=b1, b2=b2, eps=eps, eps_root=eps_root, mu_dtype=mu_dtype,
+        ),
+        _scale_by_learning_rate(learning_rate)
+    )
