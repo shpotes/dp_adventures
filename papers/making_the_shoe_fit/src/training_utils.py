@@ -32,11 +32,24 @@ def train_step(dp, model, state, batch):
 
     def loss_fn(params):
         logits = model.apply({"params": params}, batch["image"])
-        loss = jnp.mean(optax.softmax_cross_entropy(logits=logits, labels=batch["label"]))
+        loss = jnp.mean(
+            optax.softmax_cross_entropy(
+                logits=logits, 
+                labels=batch["label"]
+            )
+        )
 
         return loss, logits
     
     grad_fn = jax.value_and_grad(loss_fn, has_aux=True)
+
+    if cfg.training.dp:
+        # insert dummy dimension in axis 1 to use vmap over the batch
+        # TODO: review this, probably their is an issue in the value part!
+        batch = jax.tree_map(lambda x: x[:, None], batch)
+        # extract per-example gradients
+        grad_fn = jax.vmap(grad_fn, in_axes=(None, 0))
+
     (_, logits), grads = grad_fn(state.params)
     state = state.apply_gradients(grads=grads)
     metrics = compute_metrics(logits, labels=batch["label"], split="train")

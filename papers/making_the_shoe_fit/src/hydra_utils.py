@@ -2,6 +2,7 @@ from functools import partial
 import flax
 from hydra.utils import instantiate, get_method, get_class
 from omegaconf import OmegaConf
+import optax
 from tensorflow_datasets import Split
 from src.dataset import load_dataset
 
@@ -33,5 +34,8 @@ def get_model(cfg):
 
 
 def get_optimizer(cfg):
-    # TODO: add dp support
-    return instantiate(cfg.training.optimizer)
+    optimzier = instantiate(
+        cfg.training.optimizer
+    )
+
+    return optimzier
